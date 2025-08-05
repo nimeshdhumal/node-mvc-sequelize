@@ -68,11 +68,18 @@ exports.updateUser = async (req, res) => {
 }
 
 exports.deleteUser = async (req, res) => {
+    let id = req.params.id;
     try {
-        const checkIdAvailability = await userModel.User.findOne({ where: { id: `${req.params.id}` } });
+        const checkIdAvailability = await userModel.User.findOne({ where: { id: `${id}` } });
         if (checkIdAvailability != null) {
-            const rowsAffected = await userModel.User.destroy({ where: { id: `${req.params.id}` } });
-            console.log(rowsAffected);
+            try {
+                let deletedRows = await userModel.User.destroy({ where: { id: `${id}` } });
+                res.status(200).send({message:"Row deleted successfully!"});
+            } catch (error) {
+                res.status(500).send({ message: error.message || "Some error occurred while deleting the User." });
+            }
+        } else {
+            res.status(400).send({ message: `GIVEN ID DOES NOT FOUND :: ${req.params.id}` });
         }
     } catch (error) {
         res.status(500).send({ message: error.message || "Some error occurred while deleting the User." });
